@@ -1,0 +1,42 @@
+﻿@model IEnumerable<ImageSharingWithSecurity.Models.Image>
+
+@{
+    ViewBag.Title = "All Images";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<table>
+    <tr>
+        <th>Caption</th>
+        <th>Uploader</th>
+        <th>Tag</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var image in Model)
+    {
+        <tr>
+            <td>
+                @image.Caption
+            </td>
+            <td>
+                @image.User.UserName
+            </td>
+            <td>
+                @image.Tag.Name
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@image.Id">Details</a>
+
+                @if (ViewBag.UserId.Equals(image.UserId))
+                {
+                    <text>
+                        <!-- TODO add Edit and Delete links -->
+
+                    </text>
+                }
+            </td>
+        </tr>
+    }
+</table>

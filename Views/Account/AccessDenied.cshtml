@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Error";
+}
+
+@model ImageSharingWithSecurity.Models.ViewModels.AccessDeniedModel
+
+<h1 class="text-danger">Access Denied!</h1>
+
+<p>
+    <strong>Attempted unauthorized access to @Model.ReturnUrl</strong> 
+</p>

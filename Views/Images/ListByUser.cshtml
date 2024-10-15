@@ -1,0 +1,25 @@
+﻿@model ImageSharingWithSecurity.Models.ViewModels.ListByUserModel
+
+@{
+    ViewBag.Title = "List Images By User";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<form method="get" asp-action="DoListByUser" asp-controller="Images">
+
+    <fieldset>
+        <legend>Choose a user</legend>
+        <p>
+            <!-- TODO select user from a drop-down menu -->
+            User: 
+
+        </p>
+        <p>
+            <input type="submit" value="List" />
+        </p>
+    </fieldset>
+
+    @ViewBag.Message
+
+</form>
