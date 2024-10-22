@@ -104,14 +104,13 @@ namespace ImageSharingWithSecurity.Controllers
              * Log in the user from the model (make sure they are still active)
              */
 
-            ApplicationUser User = null;
             // TODO Use UserManager to obtain the user record from the database.
+            ApplicationUser User = await userManager.FindByEmailAsync(model.UserName);
 
             if (User != null && User.Active)
             {
-                SignInResult result = null;
                 // TODO Use SignInManager to log in the user.
-
+                SignInResult result = await signInManager.PasswordSignInAsync(User.UserName, model.Password, false, false);
                 if (result.Succeeded)
                 {
                     SaveAdaCookie(User.Ada);
@@ -132,8 +131,7 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public ActionResult Password(PasswordMessageId? message)
         {
             CheckAda();
@@ -147,7 +145,8 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO prevent CSRF
-
+        [ValidateAntiForgeryToken]
+        [HttpPost]
         public async Task<ActionResult> Password(LocalPasswordModel model)
         {
             CheckAda();
@@ -179,7 +178,7 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO require Admin permission
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Manage()
         {
             CheckAda();
@@ -198,7 +197,7 @@ namespace ImageSharingWithSecurity.Controllers
 
         // TODO require Admin permission, prevent CSRF
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Manage(ManageModel model)
         {

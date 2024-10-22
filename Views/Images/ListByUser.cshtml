@@ -12,9 +12,14 @@
         <legend>Choose a user</legend>
         <p>
             <!-- TODO select user from a drop-down menu -->
-            User: 
+            User:
+            <select asp-for="Id" asp-items="Model.Users">
+                <option value="">-- Select User --</option>
+            </select>
 
         </p>
+        <p>Selected User ID: @Model.Id</p>
+
         <p>
             <input type="submit" value="List" />
         </p>

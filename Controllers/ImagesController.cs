@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,11 +12,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace ImageSharingWithSecurity.Controllers
 {
     // TODO require authorization by default
+    [Authorize]
     public class ImagesController : BaseController
     {
         private readonly IWebHostEnvironment hostingEnvironment;
@@ -67,7 +70,8 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO prevent CSRF
-
+        [ValidateAntiForgeryToken]
+        [HttpPost]
         public async Task<ActionResult> Upload(ImageView imageView)
         {
             CheckAda();
@@ -95,8 +99,18 @@ namespace ImageSharingWithSecurity.Controllers
 
             logger.LogDebug("....saving image metadata in the database....");
 
-            Image image = new Image();
-            // TODO save image metadata in the database 
+            Image image = new Image //create the image
+            {
+                Caption = imageView.Caption,
+                Description = imageView.Description,
+                DateTaken = imageView.DateTaken,
+                UserId = user.Id, 
+                TagId = imageView.TagId,
+                Valid = true,
+                Approved = true 
+            };
+            db.Images.Add(image); //save to db
+            await db.SaveChangesAsync();
 
             // end TODO
 
@@ -105,8 +119,8 @@ namespace ImageSharingWithSecurity.Controllers
             logger.LogDebug("...saving image file on disk....");
 
             // TODO save image file on disk
-
-            // end TODO
+            var stream = new FileStream(ImageDataFile(image.Id), FileMode.Create);
+            await imageView.ImageFile.CopyToAsync(stream);
 
             logger.LogDebug("...forwarding to the details page, image id = "+image.Id);
 
@@ -181,7 +195,7 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO prevent CSRF
-
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> DoEdit(int Id, ImageView imageView)
         {
             CheckAda();
@@ -249,7 +263,8 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO prevent CSRF
-
+        [ValidateAntiForgeryToken]
+        [HttpPost]
         public async Task<ActionResult> DoDelete(int Id)
         {
             CheckAda();
@@ -303,14 +318,24 @@ namespace ImageSharingWithSecurity.Controllers
         {
             CheckAda();
 
-            // TODO list all images uploaded by the user in userView (see List By Tag)
-            return null;
-            // End TODO
+            ApplicationUser user = await db.Users
+                .Include(u => u.Images)
+                .ThenInclude(i => i.Tag) // Eagerly load the Tag for each Image
+                .FirstOrDefaultAsync(u => u.Id == userView.Id);
+
+            if (user == null)
+            {
+                return RedirectToAction("Error", "Home", new { ErrId = "ListByUser" });
+            }
+
+            var images = user.Images.Where(im => im.Approved).ToList();
+            return View("ListAll", images);
 
 
         }
 
         // TODO
+        [HttpGet]
         public ActionResult ListByTag()
         {
             CheckAda();
@@ -320,6 +345,7 @@ namespace ImageSharingWithSecurity.Controllers
         }
 
         // TODO
+        [HttpGet]
         public async Task<ActionResult> DoListByTag(ListByTagModel tagView)
         {
             CheckAda();
@@ -335,14 +361,15 @@ namespace ImageSharingWithSecurity.Controllers
             /*
              * Eager loading of related entities
              */
+            
             var images = db.Entry(tag)
                 .Collection(t => t.Images)
                 .Query().Where(im => im.Approved)
                 .Include(im => im.User)
                 .ToList();
+            
             return View("ListAll", tag.Images);
         }
-
     }
 
 }

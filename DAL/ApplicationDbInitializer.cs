@@ -20,13 +20,7 @@ namespace ImageSharingWithSecurity.DAL
 
         public async Task SeedDatabase(IServiceProvider serviceProvider)
         {
-
             await db.Database.MigrateAsync();
-
-            db.RemoveRange(db.Images);
-            db.RemoveRange(db.Tags);
-            db.RemoveRange(db.Users);
-            await db.SaveChangesAsync();
 
             logger.LogDebug("Adding role: User");
             var idResult = await CreateRole(serviceProvider, "User");
@@ -34,7 +28,16 @@ namespace ImageSharingWithSecurity.DAL
             {
                 logger.LogDebug("Failed to create User role!");
             }
-
+            var idResult2 = await CreateRole(serviceProvider, "Admin");
+            if (!idResult2.Succeeded)
+            {
+                logger.LogDebug("Failed to create User role!");
+            }
+            var idResult3 = await CreateRole(serviceProvider, "Approver");
+            if (!idResult3.Succeeded)
+            {
+                logger.LogDebug("Failed to create User role!");
+            }
             // TODO add other roles
  
 
@@ -44,21 +47,60 @@ namespace ImageSharingWithSecurity.DAL
             {
                 logger.LogDebug("Failed to create jfk user!");
             }
-
+            logger.LogDebug("Adding user: jake");
+            idResult = await CreateAccount(serviceProvider, "jake@example.org", "jake123", "Admin");
+            if (!idResult.Succeeded)
+            {
+                logger.LogDebug("Failed to create jfk user!");
+            }
             logger.LogDebug("Adding user: nixon");
             idResult = await CreateAccount(serviceProvider, "nixon@example.org", "nixon123", "User");
             if (!idResult.Succeeded)
             {
                 logger.LogDebug("Failed to create nixon user!");
             }
-
+            logger.LogDebug("Adding user: johnson");
+            idResult = await CreateAccount(serviceProvider, "johnson@example.org", "john123", "Approver");
+            if (!idResult.Succeeded)
+            {
+                logger.LogDebug("Failed to create johnson user!");
+            }
+            logger.LogDebug("Adding user: jerry");
+            idResult = await CreateAccount(serviceProvider, "jerry@example.org", "jerry123", "Approver");
+            if (!idResult.Succeeded)
+            {
+                logger.LogDebug("Failed to create jerry user!");
+            }
             // TODO add other users and assign more roles
+            
 
-            Tag portrait = new Tag { Name = "portrait" };
-            await db.Tags.AddAsync(portrait);
-            Tag architecture = new Tag { Name = "architecture" };
-            await db.Tags.AddAsync(architecture);
+            if (!await db.Tags.AnyAsync(t => t.Name == "portrait")) //make sure tags dont exist first or else they will keep populating the db
+            {
+                Tag portrait = new Tag { Name = "portrait" };
+                await db.Tags.AddAsync(portrait);
+            }
 
+            if (!await db.Tags.AnyAsync(t => t.Name == "architecture"))
+            {
+                Tag architecture = new Tag { Name = "architecture" };
+                await db.Tags.AddAsync(architecture);
+            }
+
+            if (!await db.Tags.AnyAsync(t => t.Name == "Games"))
+            {
+                Tag games = new Tag { Name = "games" };
+                await db.Tags.AddAsync(games);
+            }
+            if (!await db.Tags.AnyAsync(t => t.Name == "Show"))
+            {
+                Tag games = new Tag { Name = "show" };
+                await db.Tags.AddAsync(games);
+            }
+            if (!await db.Tags.AnyAsync(t => t.Name == "Nature"))
+            {
+                Tag games = new Tag { Name = "nature" };
+                await db.Tags.AddAsync(games);
+            }
             // TODO add other tags
 
             await db.SaveChangesAsync();

@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ImageSharingWithSecurity")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d1684e66429c5d4a7b6d850b1865280c44688aca")]
 [assembly: System.Reflection.AssemblyProductAttribute("ImageSharingWithSecurity")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ImageSharingWithSecurity")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
